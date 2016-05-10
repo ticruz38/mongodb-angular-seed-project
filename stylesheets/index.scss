@@ -1,0 +1,22 @@
+.center-text {
+  text-align: center;
+}
+.index-nav {
+  margin: 1em;
+  a {
+    cursor: pointer;
+  }
+}
+.modal-dialog {
+  width: 800px;
+}
+.restaurant {
+  .restaurant-child {
+    box-shadow: 0 0 2px 2px black;
+    cursor: pointer;
+    padding: 1em;
+    height: 11em;
+    overflow: scroll;
+  }
+  padding: 1em;
+}

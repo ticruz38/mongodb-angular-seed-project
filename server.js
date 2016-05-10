@@ -1,98 +1,82 @@
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
-var ObjectId = require('mongodb').ObjectID;
 var express = require('express');
+var bodyParser = require('body-parser');
 var webpack = require('webpack');
 var webpackDevServer = require('webpack-dev-server');
-var webpackMiddleware = require("webpack-dev-middleware");
-var webpackHotMiddleware = require('webpack-hot-middleware');
 var webpackConfig = require('./webpack.config');
+import {findRestaurants, create2dSphereIndex, updateRestaurant, insertSeeds} from './database';
 
 var app = express();
 
-//declare static path
 
-app.use('/pages', express.static(__dirname + '/client/pages'));
+webpackConfig.entry.unshift("webpack-dev-server/client?http://localhost:3000/");
+var compiler = webpack(webpackConfig);
+var server = new webpackDevServer(compiler, {
+  hot: true
+});
+server.listen(3000);
+
+app.use(bodyParser.json()); // for parsing application/json
+app.use('/pages', express.static(__dirname + '/client/pages')); //declare static path
 
 var url = 'mongodb://localhost:27017/test';
 
 var port = process.env.PORT || 8080;
 
-var insertDocument = function(db, callback) {
-   db.collection('restaurants').insertOne( {
-      "address" : {
-         "street" : "2 Avenue",
-         "zipcode" : "10075",
-         "building" : "1480",
-         "coord" : [ -73.9557413, 40.7720266 ]
-      },
-      "borough" : "Manhattan",
-      "cuisine" : "Italian",
-      "grades" : [
-         {
-            "date" : new Date("2014-10-01T00:00:00Z"),
-            "grade" : "A",
-            "score" : 11
-         },
-         {
-            "date" : new Date("2014-01-16T00:00:00Z"),
-            "grade" : "B",
-            "score" : 17
-         }
-      ],
-      "name" : "Vella",
-      "restaurant_id" : "41704620"
-   }, function(err, result) {
-    assert.equal(err, null);
-    console.log("Inserted a document into the restaurants collection.");
-    callback();
-  });
-};
-
-var findRestaurants = function(db, callback) {
-   var cursor = db.collection('restaurants').find( );
-   cursor.each(function(err, doc) {
-      assert.equal(err, null);
-      if (doc != null) {
-         console.log(doc);
-      } else {
-         callback();
-      }
-   });
-};
-
-compiler = webpack(webpackConfig)
-
-var webpackDevMidleWareInstance = webpackMiddleware(compiler, {
-  quiet: false,
-  stats: {
-    colors: true
-  },
-  publicPath: webpackConfig.output.publicPath
-});
-app.use(webpackDevMidleWareInstance);
-
-app.use(webpackHotMiddleware(compiler, {
-    log: console.log,
-}))
-
 app.use(function(req, res, next) {
   MongoClient.connect(url, function(err, db) {
-    assert.equal(null, err);
+    if(err) throw err
+    create2dSphereIndex(db);
     res.locals.db = db;
     next();
   });
 })
 
-app.get('/', function (req, res, next) {
-  res.sendFile('./client/pages/index.html', {root: __dirname});
+app.get('/', function(req, res, next) {
+  res.sendFile('./client/pages/index.html', {
+    root: __dirname
+  });
 });
+
+app.get('/seeds', function (req, res) {
+  insertSeeds(req.locals.db);
+})
+
+app.route('/api/restaurant')
+  .get(function(req, res, next) {
+    //get only one restaruant
+  })
+  .post(function(req, res, next) {
+    //add a restaurant
+  })
+  .put(function(req, res) {
+    updateRestaurant(res.locals.db, req.body.restaurant).then(function(docs, err) {
+      if(err) res.send(err);
+      res.send(docs);
+    })
+  })
+  .delete(function(req, res) {
+    //delete a restaurant
+  })
+
+app.route('/api/restaurants')
+  .get(function(req, res) {
+    findRestaurants(res.locals.db, req.query).then(function(docs, err) {
+      if (err) res.send(err);
+      res.send(docs);
+    });
+    //get all restaurants
+  })
+  .delete(function(req, res) {
+    //delete all restaurant
+  })
 
 app.use(function(req, res, next) {
   res.locals.db.close();
   next();
 })
 
-app.listen(port, function () {
-  console.log('Example app listening on port '+port+'!');
+app.listen(port, function() {
+  console.log('Example app listening on port ' + port + '!');
 });

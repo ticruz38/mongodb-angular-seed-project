@@ -1,13 +1,93 @@
 <!doctype html>
-<html lang="en" ng-app>
+<html lang="en" ng-app='myApp'>
+
 <head>
   <meta charset="utf-8">
-  <title>My HTML File</title>
-  <script src="scripts/app.js"></script>
+  <title>Restaurants management</title>
 </head>
-<body>
 
-  <p>Nothing here {{'yet' + '!'}}</p>
-
+<body ng-controller="IndexController as index">
+  <div class='container-fluid row'>
+    <h1 class='center-text'>Restaurant List</h1>
+    <ul class='index-nav nav nav-pills'>
+      <li role='presentation' class='load active' ng-click='index.loadMoreRestaurants()'><a>Load more restaurants</a></li>
+      <li role='presentation' class='dropdown'><a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Order-By <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a>Grade</a></li>
+          <li ng-click='index.sortBy("distance")'><a>Distance</a></li>
+        </ul>
+      </li>
+      <li role='presentation' class='dropdown'><a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Borough: <span class='label label-primary'>{{query.borough}}</span><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li ng-click='index.borough(undefined)'><a>All</a></li>
+          <li ng-click='index.borough("Queens")'><a>Queens</a></li>
+          <li ng-click='index.borough("Bronx")'><a>Bronx</a></li>
+          <li ng-click='index.borough("Staten Island")'><a>Staten Island</a></li>
+          <li ng-click='index.borough("Manhattan")'><a>Manhattan</a></li>
+          <li ng-click='index.borough("Brooklyn")'><a>Brooklyn</a></li>
+        </ul>
+      </li>
+      <li role='presentation' class='dropdown'><a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Cuisine: <span class='label label-primary'>{{query.cuisine}}</span> <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li ng-click='index.cuisine(undefined)'><a>All</a></li>
+          <li ng-click='index.cuisine("Chilean")'><a>Chilean</a></li>
+          <li ng-click='index.cuisine("Hawaiian")'><a>Hawaiian</a></li>
+          <li ng-click='index.cuisine("Southwestern")'><a>Southwestern</a></li>
+          <li ng-click='index.cuisine("Hotdogs/Pretzels")'><a>Hotdogs/Pretzels</a></li>
+          <li ng-click='index.cuisine("Australian")'><a>Australian</a></li>
+          <li ng-click='index.cuisine("Salads")'><a>Salads</a></li>
+          <li ng-click='index.cuisine("Czech")'><a>Czech</a></li>
+          <li ng-click='index.cuisine("Bangladeshi")'><a>Bangladeshi</a></li>
+          <li ng-click='index.cuisine("Pakistani")'><a>Pakistani</a></li>
+          <li ng-click='index.cuisine("Peruvian")'><a>Peruvian</a></li>
+          <li ng-click='index.cuisine("Soups & Sandwiches")'><a>Soups & Sandwiches"</a></li>
+          <li ng-click='index.cuisine("Nuts/Confectionary")'><a>Nuts/Confectionary"</a></li>
+          <li ng-click='index.cuisine("CafÃ©/Coffee/Tea")'><a>CafÃ©/Coffee/Tea</a></li>
+          <li ng-click='index.cuisine("Vietnamese/Cambodian/Malaysia")'><a>Vietnamese/Cambodian/Malaysia</a></li>
+          <li ng-click='index.cuisine("Chinese/Japanese")'><a>Chinese/Japanese</a></li>
+        </ul>
+      </li>
+    </ul>
+    <div class='center-block row'>
+      <div class='restaurant col-lg-2 col-md-3 col-sm-6 col-xs-12' ng-repeat='restaurant in restaurants'>
+        <div class='restaurant-child' ng-click='index.showModal(restaurant)'>
+          <span class='pull-right text-warning'>{{restaurant.borough}}</span>
+          <h2 class='h4'>{{restaurant.name}}</h2>
+          <strong class='text-info'>{{restaurant.cuisine}} food</strong>
+          <address>
+            {{restaurant.address.building}}
+            {{restaurant.address.street}}
+            {{restaurant.address.zipcode}}
+          </address>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><input type='text' id='name' ng-model='restaurant.name'/></h4>
+        </div>
+        <div class="modal-body">
+          <label for="cuisine">Cuisine : </label><input type='text' id='cuisine' ng-model='restaurant.cuisine'/><br/>
+          <label for="borough"/>Borough : </label><input type='text' id='borough' ng-model='restaurant.borough'/><br/>
+          <label for="building"/>Building : </label><input type='text' id='building' ng-model='restaurant.address.building'/>
+          <label for="borough"/>Street : </label><input type='text' id='street' ng-model='restaurant.address.street'/>
+          <label for="borough"/>Zipcode : </label><input type='text' id='zipcode' ng-model='restaurant.address.zipcode'/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" ng-click='index.deleteRestaurant(restaurant._id)'><i class='glyphicon glyphicon-remove'></i> Close the Restaurant</button>
+          <button type="button" class="btn btn-primary" ng-click='index.updateRestaurant()'>Save changes</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://localhost:3000/app.js"></script>
 </body>
+
 </html>
